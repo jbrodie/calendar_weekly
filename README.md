@@ -21,26 +21,33 @@ don't need them so tall or want a single week with taller space for appointments
 ## Installing the module
 Clone this repository in your `~/MagicMirror/modules/` folder `( $ cd ~MagicMirror/modules/ )`:
 ````javascript
-git clone https://github.com/jbrodie/calenday_weekly
+git clone git@github.com:jbrodie/calendar_weekly.git
 ````
 
 ## Using the module
 To use this module, add it to the modules array in the `config/config.js` file:
 ````javascript
 modules: [
-			{
-				module: 'calendar_weekly',
-				position: 'top_left',
-				config: {
-						// The config property is optional
-						// Without a config, a default month view is shown
-						// Please see the 'Configuration Options' section for more information
+	{
+		module: 'calendar_weekly',
+		position: 'lower_third',
+		config: {
+			fetchInterval: 10000,
+			weeksToShow: 2,
+			calendars: [{
+					url: "https://www.calendarlabs.com/ical-calendar/ics/39/Canada_Holidays.ics"
+				},
+				{
+					url: "https://www.calendarlabs.com/ical-calendar/ics/76/US_Holidays.ics"
 				}
-			}
+			]
+		}
+	},
 ]
 ````
 
 ## Configuration options
+It is recommended that this module be used in the lower third position due to its size.
 The `calendar_weekly` module has several optional properties that can be used to change its behaviour:
 
 <table>
@@ -51,37 +58,21 @@ The `calendar_weekly` module has several optional properties that can be used to
 			<th>Default</th>
 		</tr>
 	</thead>
-	<tfoot>
-		<tr>
-			<th colspan="3"><em>More options may get added later.</em></th>
-		</tr>
-	</tfoot>
 	<tbody>
 		<tr>
-			<td><code>fadeSpeed</code></td>
-			<td>How fast <strong>(in seconds)</strong> to fade out and back in at the midnight refresh</td>
-			<td><code>2</code> seconds</td>
+			<td><code>fetchInterval</code></td>
+			<td>How often to refresh and pull calendar data in milliseconds.</td>
+			<td>300000</td>
 		</tr>
 		<tr>
-			<td><code>showHeader</code></td>
-			<td>This allows you to turn on or off the header on the calendar.
-			    The header consists of the month and year.</td>
-			<td><code>true</code> - Other option is <code>false</code>.</td>
+			<td><code>weeksToShow</code></td>
+			<td>How many weeks to display on the calendar.  Should be between 1 and 3, if you want to show more then you will have to make CSS changes for the height of each row.</td>
+			<td>2</td>
 		</tr>
 		<tr>
-			<td><code>cssStyle</code></td>
-			<td>calendar_weekly allows you to use a custom CSS to style your calendar, or
-			    you can use one of the built-in ones. Please read the 'CSS Styling'
-				section for more information.</td>
-			<td><code>block</code> - Other options are <code>clean</code>, <code>slate</code>, and <code>custom</code>. Others
-			    may be added in the future. Please note that the <code>slate</code> style is designed for mirror-less displays.</td>
-		</tr>
-		<tr>
-			<td><code>updateDelay</code></td>
-			<td>How long <strong>(in seconds)</strong> to wait before refreshing the calendar at midnight<br />
-			    This is primarily done in case there are other modules also triggering at exactly midnight.
-				This allows the user to set a delay so the calendar won't refresh at the same time.</td>
-			<td><code>5</code> seconds</td>
+			<td><code>calendars</code></td>
+			<td>Array or URLs to the calendars you wish to show.</td>
+			<td>300000 (5 minutes)</td>
 		</tr>
 	</tbody>
 </table>

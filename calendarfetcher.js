@@ -75,7 +75,7 @@ var CalendarFetcher = function(url, auth, reloadInterval, maximumNumberOfDays, p
         var now = new Date();
         var previous_days_ago = moment().startOf("day").subtract(previousDaysOfEvents, 'days');
         var today = moment().startOf("day").toDate();
-        var future = moment().startOf("day").add(maximumNumberOfDays, "days").subtract(1, "seconds").toDate(); // Subtract 1 second so that events that start on the middle of the night will not repeat.
+        var future = moment().startOf("day").add(maximumNumberOfDays, "days").subtract(1, "seconds"); // Subtract 1 second so that events that start on the middle of the night will not repeat.
 
         // FIXME:
         // Ugly fix to solve the facebook birthday issue.
@@ -135,12 +135,15 @@ var CalendarFetcher = function(url, auth, reloadInterval, maximumNumberOfDays, p
 
           if (typeof event.rrule != "undefined" && !isFacebookBirthday) {
             var rule = event.rrule;
-            var dates = rule.between(today, future, true);
+            var dates = rule.between(today, future.toDate(), true);
 
             for (var d in dates) {
               startDate = moment(new Date(dates[d]));
               endDate = moment(parseInt(startDate.format("x")) + duration, "x");
               if (endDate.format("x") > previous_days_ago.format("x")) {
+                console.log("Recurring Event: " + title)
+                console.log("Recurring Event Start Date: " + moment(parseInt(startDate.format("x")), "x").toDate());
+                console.log("Recurring Event End Date: " + moment(parseInt(endDate.format("x")), "x").toDate());
 	              newEvents.push({
 	                title: title,
 	                startDate: startDate.format("x"),
@@ -160,17 +163,24 @@ var CalendarFetcher = function(url, auth, reloadInterval, maximumNumberOfDays, p
             var fullDayEvent = (isFacebookBirthday) ? true : isFullDayEvent(event);
             // console.log(endDate + ":::::                                                   " + previous_days_ago.format('x'));
             if (!fullDayEvent && endDate < previous_days_ago.format('x')) {
+              console.log("NOT FULL DAY OUTSIDE: " + title + ":" + moment(parseInt(endDate.format("x")), "x").toDate());
               // console.log("It's not a fullday event, and it is in the past. So skip: " + title);
               continue;
             }
 
-            if (fullDayEvent && endDate <= previous_days_ago.toDate()) {
+            if (fullDayEvent && endDate <= previous_days_ago.format('x')) {
+              console.log("FULL DAY OUTSIDE: " + title + ":" + moment(parseInt(endDate.format("x")), "x").toDate());
+
               // console.log("It's a fullday event, and it is before today. So skip: " + title);
               // console.log(endDate + "                           :::::" + previous_days_ago.format('x'));
               continue;
             }
 
-            if (startDate > future) {
+            if (startDate > future.format('x')) {
+              console.log("START DATE OUTSIDE: " + title + ":" + moment(parseInt(startDate.format("x")), "x").toDate());
+              console.log("Start Date:" + startDate);
+              console.log("Future:" + future.format('x'));
+
               // console.log("It exceeds the maximumNumberOfDays limit. So skip: " + title);
               continue;
             }
@@ -200,6 +210,9 @@ var CalendarFetcher = function(url, auth, reloadInterval, maximumNumberOfDays, p
 
       // events = newEvents.slice(0, maximumEntries);
       events = newEvents;
+      // console.log('=========================================================');
+      // console.dir(newEvents);
+      // console.log('=========================================================');
 
       self.broadcastEvents();
       scheduleTimer();

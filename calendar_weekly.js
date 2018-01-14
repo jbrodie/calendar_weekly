@@ -8,18 +8,16 @@ Module.register("calendar_weekly", {
 
   // Module defaults
   defaults: {
-    debugging: true,
-    initialLoadDelay: 0, // How many seconds to wait on a fresh start up.
-    // This is to prevent collision with all other modules also
-    // loading all at the same time. This only happens once,
-    // when the mirror first starts up.
-    fadeSpeed: 2, // How fast (in seconds) to fade out and in during a midnight refresh
+    debugging: false,
+    fadeSpeed: 2, // How fast (in seconds) to fade out and in during a refresh
     showHeader: true, // Show the month and year at the top of the calendar
     cssStyle: "block", // which CSS style to use, 'clear', 'block', 'slate', or 'custom'
     updateDelay: 5, // How many seconds after midnight before a refresh
     // This is to prevent collision with other modules refreshing
     // at the same time.
     weeksToShow: 2,
+    previousDaysOfEvents: 7, // This can not be changed as we need to pull the possible
+    // entire week previous.
   },
 
   // Required styles
@@ -47,22 +45,15 @@ Module.register("calendar_weekly", {
     var now = moment();
     this.midnight = moment([now.year(), now.month(), now.date() + 1]).add(this.config.updateDelay, "seconds");
     this.EventsList = [];
-
-    Log.log("8888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888");
     Log.log("Starting module: " + this.name);
-
-    // Set locale.
-    // moment.updateLocale(config.language, this.getLocaleSpecification(config.timeFormat));
 
     for (var c in this.config.calendars) {
       var calendar = this.config.calendars[c];
       calendar.url = calendar.url.replace("webcal://", "http://");
-
       var calendarConfig = {
-        maximumNumberOfDays: calendar.maximumNumberOfDays,
-        previousDaysOfEvents: calendar.previousDaysOfEvents,
+        maximumNumberOfDays: this.config.weeksToShow * 7,
+        previousDaysOfEvents: this.config.previousDaysOfEvents,
       };
-
       // we check user and password here for backwards compatibility with old configs
       if (calendar.user && calendar.pass) {
         Log.warn("Deprecation warning: Please update your calendar authentication configuration.");
@@ -72,18 +63,16 @@ Module.register("calendar_weekly", {
           pass: calendar.pass
         }
       }
-
       this.addCalendar(calendar.url, calendar.auth, calendarConfig);
     }
 
     this.calendarData = {};
     this.loaded = false;
     this.reloadDom();
-
   },
 
   addCalendar: function(url, auth, calendarConfig) {
-    Log.log('++++++++++++++++++++++++++++++ addCaledar in calendar_weekly');
+    // Log.log('++++++++++++++++++++++++++++++ addCaledar in calendar_weekly');
     this.sendSocketNotification("ADD_CALENDAR_WEEKLY", {
       url: url,
       auth: auth,
@@ -201,6 +190,12 @@ Module.register("calendar_weekly", {
         innerSpan.innerHTML = dayOfWeek.date();
         dayDiv.appendChild(innerSpan);
         var events = this.days_events(dayOfWeek.date(), dayOfWeek.month());
+        if (dayOfWeek.date() == 15 || dayOfWeek.date() == 16) {
+          console.log('====================================================================');
+          console.log(dayOfWeek.date() + ' : ' + dayOfWeek.month());
+          console.dir(events);
+          console.log('====================================================================');
+        }
         for (var i = 0; i < events[0].length; i++) {
           var fullDayEventSpan = document.createElement("span");
           fullDayEventSpan.className = "full-day-event";
@@ -315,18 +310,13 @@ Module.register("calendar_weekly", {
 
   // Override socket notification handler.
   socketNotificationReceived: function(notification, payload, sender) {
-    // console.dir(payload);
-    console.log('_________________________________________________________');
-    console.log(notification);
-    console.log('_________________________________________________________');
-
     payload = payload['events'];
     if (notification === "WEEKLY_EVENTS") {
       if (typeof payload !== 'undefined' && payload !== null) {
         for (var i = 0; i < payload.length; i++) {
           var dublicate = false;
           for (var j = 0; j < this.EventsList.length; j++) {
-            if (this.EventsList[j].title === payload[i].title) {
+            if (this.EventsList[j].title === payload[i].title && this.EventsList[j].startDate === payload[i].startDate) {
               this.EventsList[j] = payload[i];
               dublicate = true;
             }
@@ -340,7 +330,7 @@ Module.register("calendar_weekly", {
           var event_date = moment(start_date);
           var day = moment(start_date).date();
           var month = moment(start_date).month();
-          //console.log(day + " "+ month + " "+ event_date.format("MMMM") + " " + moment().format("MMMM"));
+          console.log(day + " "+ month + " "+ event_date.format("MMMM") + " " + moment().format("MMMM"));
         }
         console.log("Getting events from my-calendar module " + this.EventsList.length);
       }
@@ -367,22 +357,29 @@ Module.register("calendar_weekly", {
       // console.log(start_date);
       // console.log(today);
       // console.log(moment(start_date).date());
+
       if (today === moment(start_date).date() && month === moment(start_date).month()) {
+        if (today == 15 || today == 16) {
+          console.log('====================================================================');
+          console.log("Hit this one the: " + today);
+          console.dir(this.EventsList[i]);
+          console.log('====================================================================');
+        }
         if (this.EventsList[i].fullDayEvent === true) {
-          console.log('Matched FULL DAY an event');
+          // console.log('Matched FULL DAY an event');
           events[0].push(this.EventsList[i]);
         } else {
-          console.log('Matched an event');
+          // console.log('Matched an event');
           events[1].push(this.EventsList[i]);
         }
       }
     }
-    events[0].sort(function(a, b) {
-      return (a.title > b.title) ? 1 : ((b.title > a.title) ? -1 : 0);
-    });
-    events[1].sort(function(a, b) {
-      return (a.startDate > b.startDate) ? 1 : ((b.startDate > a.startDate) ? -1 : 0);
-    });
+    // events[0].sort(function(a, b) {
+    //   return (a.title > b.title) ? 1 : ((b.title > a.title) ? -1 : 0);
+    // });
+    // events[1].sort(function(a, b) {
+    //   return (a.startDate > b.startDate) ? 1 : ((b.startDate > a.startDate) ? -1 : 0);
+    // });
     return events;
   },
 
