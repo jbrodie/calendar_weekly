@@ -1,5 +1,7 @@
 # Module: Weekly Calendar
 
+![alt text](https://github.com/jbrodie/calendar_weekly/blob/master/weekly_calendar.png)
+
 The 'calendar_weekly' module is for a week by week listing of your calendar events
 showing the detail and times of your appointments for the Magic Mirror project
 (https://github.com/MichMich/MagicMirror).
