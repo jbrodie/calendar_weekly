@@ -1,0 +1,90 @@
+/* Block styling */
+
+.square-box {
+	width: 100%;
+	overflow: hidden;
+	margin: 0px auto;
+	height: 175px;
+}
+
+.current-month-day-span {
+	width: 100%;
+	display:block;
+	text-align: center;
+	background-color: #0d0d0d;
+	color: #FFFFFF;
+}
+
+.previous-next-month-day-span {
+	width: 100%;
+	display:block;
+	text-align: center;
+	background-color: #828080;
+	color: #262626;
+}
+
+.square-box .today{
+	width: 100%;
+	display:block;
+	text-align: center;
+	background-color: #FFFFFF;
+	color: #000000;
+}
+
+.square-box .full-day-event{
+	width: 100%;
+	display:block;
+	text-align: center;
+	background-color: #8c8c8c;
+	color: #000000;
+}
+.square-box .day-event{
+	width: 100%;
+	display:block;
+	text-align: left;
+	background-color: #000000;
+	color: #FFFFFF;
+}
+
+
+/*.square-box:before {
+	content: "";
+	display: block;
+	padding-top: 20%;
+}*/
+
+/*.square-content {
+	top: 0;
+	left: 0;
+	bottom: 0;
+	right: 0;
+}*/
+
+/*.square-content .today {
+	border: 1px solid #cccccc;
+	border-radius: 2px;
+	background-color: #cccccc;
+	font-weight: bold;
+	color: #333333;
+}*/
+/*.square-content .event {
+    font-weight: bold;
+    color: blue;
+}
+
+.square-content .public_event {
+    font-weight: bold;
+    color: red;
+}*/
+
+/*.square-content div {
+	display: table;
+	width: 100%;
+	height: 100%;
+}
+
+.square-content span {
+	display: table-cell;
+	text-align: center;
+	vertical-align: middle;
+}*/
