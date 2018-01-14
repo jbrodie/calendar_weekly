@@ -1,13 +1,27 @@
-# Module: Calendar [Monthly]
+# Module: Weekly Calendar
 
-The `calendar_weekly` module is a simple month-view calendar created for the MagicMirror project
-by Michael Teeuw (https://github.com/MichMich/MagicMirror). The modules refreshes its timer every
-hour however it will only update the calendar display once a day, at midnight.
+The 'calendar_weekly' module is for a week by week listing of your calendar events
+showing the detail and times of your appointments for the Magic Mirror project
+(https://github.com/MichMich/MagicMirror).
+
+This module was a modification to the original work from the 'calendar_monthly'
+module by @KirAsh4 located (https://github.com/KirAsh4/calendar_monthly/).  
+Most of the framework and the display was based from this module.
+
+The calendar loading was repurposed with some modifications from the 'calendarfetcher.js'
+node helper written by Michael Teeuw.
+
+Things to keep in mind with this module.  I have built it based on the 2 week window
+on the calendar I wanted to be able to display.  That being said, you can make this
+1 - 3 weeks without any serious issues but it must be positioned in the 'lower_third'
+position to not conflict with the other modules on the mirror for space.  You can
+also make space by changing the height in the rows through the css as well if you
+don't need them so tall or want a single week with taller space for appointments.
 
 ## Installing the module
 Clone this repository in your `~/MagicMirror/modules/` folder `( $ cd ~MagicMirror/modules/ )`:
 ````javascript
-git clone https://github.com/KirAsh4/calendar_weekly
+git clone https://github.com/jbrodie/calenday_weekly
 ````
 
 ## Using the module
@@ -88,13 +102,13 @@ The full element tree is as follows:
 	  </th>
 	</tr>
   </thead>
-  
+
   <tfoot>
     <tr id="calender-tf">
 	  <td class="footer"> </td>
 	</tr>
   </tfoot>
-  
+
   <tbody>
     <tr id="calendar-header">
 	  <td class="calendar-header-day">[day name]</td>

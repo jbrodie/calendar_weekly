@@ -19,6 +19,7 @@ Module.register("calendar_weekly", {
     updateDelay: 5, // How many seconds after midnight before a refresh
     // This is to prevent collision with other modules refreshing
     // at the same time.
+    weeksToShow: 2,
   },
 
   // Required styles
@@ -92,15 +93,14 @@ Module.register("calendar_weekly", {
     });
   },
 
-  create_weeks_table: function(shift) {
-    var current_month = moment().add(shift, "month");
-    var prev_month = moment().add(shift - 1, "month");
-    var month = current_month.month();
-    var year = current_month.year();
-    var monthName = current_month.format("MMMM");
-    var monthLength = current_month.daysInMonth();
+  create_weeks_table: function() {
+    var current_date = moment();
+    var month = current_date.month();
+    var year = current_date.year();
+    var monthName = current_date.format("MMMM");
+    var monthLength = current_date.daysInMonth();
     // Find first day of the month, LOCALE aware
-    var startingDay = current_month.date(1).weekday();
+    var startingDay = current_date.date(1).weekday();
 
     var wrapper = document.createElement("table");
     wrapper.className = 'xsmall';
@@ -160,7 +160,7 @@ Module.register("calendar_weekly", {
     for (var i = 0; i <= 6; i++) {
       var bodyTD = document.createElement("td");
       bodyTD.className = "calendar-header-day";
-      bodyTD.innerHTML = current_month.weekday(i).format("ddd");
+      bodyTD.innerHTML = current_date.weekday(i).format("ddd");
       bodyTR.appendChild(bodyTD);
     }
     bodyContent.appendChild(bodyTR);
@@ -177,7 +177,7 @@ Module.register("calendar_weekly", {
     // var dayOfWeek = moment('2018-01-01').startOf('week').subtract(1, 'days');
     // var today = moment('2018-01-01');
 
-    for (var y = 1; y <= 2; y++) {
+    for (var y = 1; y <= this.config.weeksToShow; y++) {
       var bodyTR = document.createElement("tr");
       bodyTR.className = "weekRow";
 
@@ -251,7 +251,7 @@ Module.register("calendar_weekly", {
     //       innerSpan.className = "monthPrev";
     //       var prev_month_day = prev_month.endOf('month').subtract((startingDay - 1) - j, 'days').date();
     //       innerSpan.innerHTML = prev_month_day;
-    //       console.log("DRAGO " + j + " " + prev_month_day + " " + startingDay + " " + current_month);
+    //       console.log("DRAGO " + j + " " + prev_month_day + " " + startingDay + " " + current_date);
     //     } else if (day <= monthLength && (i > 0 || j >= startingDay)) {
     //       if (day == moment().date() && shift == 0) {
     //         innerSpan.id = "day" + day;
