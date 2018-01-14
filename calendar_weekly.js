@@ -39,8 +39,6 @@ Module.register("calendar_weekly", {
     Log.log("Starting module: " + this.name);
     // Set locale
     moment.locale(config.language);
-    // Open socket communication
-    this.sendSocketNotification("hello");
     // Calculate next midnight and add updateDelay
     var now = moment();
     this.midnight = moment([now.year(), now.month(), now.date() + 1]).add(this.config.updateDelay, "seconds");
@@ -72,7 +70,6 @@ Module.register("calendar_weekly", {
   },
 
   addCalendar: function(url, auth, calendarConfig) {
-    // Log.log('++++++++++++++++++++++++++++++ addCaledar in calendar_weekly');
     this.sendSocketNotification("ADD_CALENDAR_WEEKLY", {
       url: url,
       auth: auth,
@@ -123,24 +120,6 @@ Module.register("calendar_weekly", {
     header.appendChild(headerTR);
     wrapper.appendChild(header);
 
-    // Create TFOOT section -- currently used for debugging only
-    // var footer = document.createElement('tFoot');
-    // var footerTR = document.createElement("tr");
-    // footerTR.id = "calendar-tf";
-    //
-    // var footerTD = document.createElement("td");
-    // footerTD.colSpan = "7";
-    // footerTD.className = "footer";
-    // if (this.config.debugging) {
-    //   footerTD.innerHTML = "Calendar currently in DEBUG mode!<br />Please see console log.";
-    // } else {
-    //   footerTD.innerHTML = "&nbsp;";
-    // }
-    //
-    // footerTR.appendChild(footerTD);
-    // footer.appendChild(footerTR);
-    // wrapper.appendChild(footer);
-
     // Create TBODY section with day names
     var bodyContent = document.createElement("tBody");
     var bodyTR = document.createElement("tr");
@@ -163,9 +142,6 @@ Module.register("calendar_weekly", {
     // Start laying out the week
     var dayOfWeek = moment().startOf('week').subtract(1, 'days');
     var today = moment();
-    // var dayOfWeek = moment('2018-01-01').startOf('week').subtract(1, 'days');
-    // var today = moment('2018-01-01');
-
     for (var y = 1; y <= this.config.weeksToShow; y++) {
       var bodyTR = document.createElement("tr");
       bodyTR.className = "weekRow";
@@ -190,12 +166,6 @@ Module.register("calendar_weekly", {
         innerSpan.innerHTML = dayOfWeek.date();
         dayDiv.appendChild(innerSpan);
         var events = this.days_events(dayOfWeek.date(), dayOfWeek.month());
-        if (dayOfWeek.date() == 15 || dayOfWeek.date() == 16) {
-          console.log('====================================================================');
-          console.log(dayOfWeek.date() + ' : ' + dayOfWeek.month());
-          console.dir(events);
-          console.log('====================================================================');
-        }
         for (var i = 0; i < events[0].length; i++) {
           var fullDayEventSpan = document.createElement("span");
           fullDayEventSpan.className = "full-day-event";
@@ -208,94 +178,19 @@ Module.register("calendar_weekly", {
           eventSpan.innerHTML = moment(parseInt(events[1][i].startDate)).format("h:mm A") + ": " + events[1][i].title;
           dayDiv.appendChild(eventSpan);
         }
-        // var event_type = this.has_event(day, month);
-        // if (event_type > 0) {
-        //   if (event_type === 1) {
-        //     innerSpan.className = "event";
-        //   } else if (event_type === 2) {
-        //     innerSpan.className = "public_event";
-        //   }
-        // }
-
         bodyTD.appendChild(dayDiv);
         bodyTR.appendChild(bodyTD);
       }
       bodyContent.appendChild(bodyTR);
     }
-    // -------------------------
-
-
-    // // Fill in the days
-    // var day = 1;
-    // var nextMonth = 1;
-    // // Loop for amount of weeks (as rows)
-    // for (var i = 0; i < 9; i++) {
-    //   // Loop for each weekday (as individual cells)
-    //   for (var j = 0; j <= 6; j++) {
-    //     var bodyTD = document.createElement("td");
-    //     bodyTD.className = "calendar-day";
-    //     var squareDiv = document.createElement("div");
-    //     squareDiv.className = "square-box";
-    //     var squareContent = document.createElement("div");
-    //     squareContent.className = "square-content";
-    //     var squareContentInner = document.createElement("div");
-    //     var innerSpan = document.createElement("span");
-    //
-    //     if (j < startingDay && i == 0) {
-    //       // First row, fill in empty slots
-    //       innerSpan.className = "monthPrev";
-    //       var prev_month_day = prev_month.endOf('month').subtract((startingDay - 1) - j, 'days').date();
-    //       innerSpan.innerHTML = prev_month_day;
-    //       console.log("DRAGO " + j + " " + prev_month_day + " " + startingDay + " " + current_date);
-    //     } else if (day <= monthLength && (i > 0 || j >= startingDay)) {
-    //       if (day == moment().date() && shift == 0) {
-    //         innerSpan.id = "day" + day;
-    //         innerSpan.className = "today";
-    //       } else {
-    //         innerSpan.id = "day" + day;
-    //         innerSpan.className = "daily";
-    //         var event_type = this.has_event(day, month);
-    //         if (event_type > 0) {
-    //           if (event_type === 1) {
-    //             innerSpan.className = "event";
-    //           } else if (event_type === 2) {
-    //             innerSpan.className = "public_event";
-    //           }
-    //         }
-    //       }
-    //       innerSpan.innerHTML = day;
-    //       day++;
-    //     } else if (day > monthLength && i > 0) {
-    //       // Last row, fill in empty space
-    //       innerSpan.className = "monthNext�";
-    //       innerSpan.innerHTML = moment([year, month, monthLength]).add(nextMonth, 'days').date();
-    //       nextMonth++;
-    //     }
-    //     squareContentInner.appendChild(innerSpan);
-    //     squareContent.appendChild(squareContentInner);
-    //     squareDiv.appendChild(squareContent);
-    //     bodyTD.appendChild(squareDiv);
-    //     bodyTR.appendChild(bodyTD);
-    //   }
-    //   // Don't need any more rows if we've run out of days
-    //   if (day > monthLength) {
-    //     break;
-    //   } else {
-    //     bodyTR.appendChild(bodyTD);
-    //     bodyContent.appendChild(bodyTR);
-    //     var bodyTR = document.createElement("tr");
-    //     bodyTR.className = "weekRow";
-    //   }
-    // }
 
     bodyContent.appendChild(bodyTR);
     wrapper.appendChild(bodyContent);
     console.dir(this.EventsList);
 
     return wrapper;
-
-    //		}
   },
+
   // Override dom generator
   getDom: function() {
     var wrapper = document.createElement("div");
@@ -306,7 +201,6 @@ Module.register("calendar_weekly", {
     this.loaded = true;
     return wrapper;
   },
-
 
   // Override socket notification handler.
   socketNotificationReceived: function(notification, payload, sender) {
@@ -324,24 +218,19 @@ Module.register("calendar_weekly", {
           if (!dublicate) {
             this.EventsList.push(payload[i]);
           }
-
           var start_date = parseInt(payload[i].startDate);
-          //console.log(moment(start_date));
           var event_date = moment(start_date);
           var day = moment(start_date).date();
           var month = moment(start_date).month();
-          console.log(day + " "+ month + " "+ event_date.format("MMMM") + " " + moment().format("MMMM"));
         }
         console.log("Getting events from my-calendar module " + this.EventsList.length);
       }
     } else {
-      Log.log("Calendar received an unknown socket notification: " + notification);
+      console.log("Calendar received an unknown socket notification: " + notification);
     }
-
     if (this.loaded) {
       this.updateDom(this.config.fadeSpeed * 1000);
     }
-
   },
 
   // Returns an 2 position array
@@ -354,36 +243,22 @@ Module.register("calendar_weekly", {
     ];
     for (var i = 0; i < this.EventsList.length; i++) {
       var start_date = parseInt(this.EventsList[i].startDate);
-      // console.log(start_date);
-      // console.log(today);
-      // console.log(moment(start_date).date());
-
       if (today === moment(start_date).date() && month === moment(start_date).month()) {
-        if (today == 15 || today == 16) {
-          console.log('====================================================================');
-          console.log("Hit this one the: " + today);
-          console.dir(this.EventsList[i]);
-          console.log('====================================================================');
-        }
         if (this.EventsList[i].fullDayEvent === true) {
-          // console.log('Matched FULL DAY an event');
           events[0].push(this.EventsList[i]);
         } else {
-          // console.log('Matched an event');
           events[1].push(this.EventsList[i]);
         }
       }
     }
-    // events[0].sort(function(a, b) {
-    //   return (a.title > b.title) ? 1 : ((b.title > a.title) ? -1 : 0);
-    // });
-    // events[1].sort(function(a, b) {
-    //   return (a.startDate > b.startDate) ? 1 : ((b.startDate > a.startDate) ? -1 : 0);
-    // });
+    events[0].sort(function(a, b) {
+      return (a.title > b.title) ? 1 : ((b.title > a.title) ? -1 : 0);
+    });
+    events[1].sort(function(a, b) {
+      return (a.startDate > b.startDate) ? 1 : ((b.startDate > a.startDate) ? -1 : 0);
+    });
     return events;
   },
-
-
 
   scheduleUpdate: function(delay) {
     if (typeof delay !== "undefined" && delay >= 0) {
@@ -410,6 +285,5 @@ Module.register("calendar_weekly", {
     var nextRefresh = moment([now.year(), now.month(), now.date(), now.hour() + 1]);
     this.scheduleUpdate(nextRefresh);
   },
-
 
 });

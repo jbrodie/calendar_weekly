@@ -17,7 +17,6 @@ module.exports = NodeHelper.create({
     this.fetchers = [];
 
     console.log("Starting node helper for: " + this.name);
-    // console.log("=====================================================" + this.name);
 
   },
 
