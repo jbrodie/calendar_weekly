@@ -1,7 +1,8 @@
 /* Magic Mirror
  * Node Helper: Calendar - CalendarFetcher
  *
- * By Michael Teeuw http://michaelteeuw.nl
+ * Orignally By Michael Teeuw http://michaelteeuw.nl
+ * Modified for application by Jay Brodie
  * MIT Licensed.
  */
 
@@ -59,12 +60,7 @@ var CalendarFetcher = function(url, auth, reloadInterval, maximumNumberOfDays, p
         return;
       }
 
-      // console.log(data);
       newEvents = [];
-
-      // var limitFunction = function(date, i) {
-      //   return i < maximumEntries;
-      // };
 
       var eventDate = function(event, time) {
         return (event[time].length === 8) ? moment(event[time], "YYYYMMDD") : moment(new Date(event[time]));
@@ -88,7 +84,6 @@ var CalendarFetcher = function(url, auth, reloadInterval, maximumNumberOfDays, p
         }
 
         if (event.type === "VEVENT") {
-
           var startDate = eventDate(event, "start");
           var endDate;
           if (typeof event.end !== "undefined") {
@@ -100,7 +95,6 @@ var CalendarFetcher = function(url, auth, reloadInterval, maximumNumberOfDays, p
               endDate = moment(startDate).add(1, "days");
             }
           }
-
 
           // calculate the duration f the event for use with recurring events.
           var duration = parseInt(endDate.format("x")) - parseInt(startDate.format("x"));
@@ -116,19 +110,6 @@ var CalendarFetcher = function(url, auth, reloadInterval, maximumNumberOfDays, p
             title = event.description;
           }
 
-          // var excluded = false;
-          // for (var f in excludedEvents) {
-          //   var filter = excludedEvents[f];
-          //   if (title.toLowerCase().includes(filter.toLowerCase())) {
-          //     excluded = true;
-          //     break;
-          //   }
-          // }
-
-          // if (excluded) {
-          //   continue;
-          // }
-
           var location = event.location || false;
           var geo = event.geo || false;
           var description = event.description || false;
@@ -141,9 +122,6 @@ var CalendarFetcher = function(url, auth, reloadInterval, maximumNumberOfDays, p
               startDate = moment(new Date(dates[d]));
               endDate = moment(parseInt(startDate.format("x")) + duration, "x");
               if (endDate.format("x") > previous_days_ago.format("x")) {
-                console.log("Recurring Event: " + title)
-                console.log("Recurring Event Start Date: " + moment(parseInt(startDate.format("x")), "x").toDate());
-                console.log("Recurring Event End Date: " + moment(parseInt(endDate.format("x")), "x").toDate());
 	              newEvents.push({
 	                title: title,
 	                startDate: startDate.format("x"),
@@ -158,35 +136,20 @@ var CalendarFetcher = function(url, auth, reloadInterval, maximumNumberOfDays, p
               }
             }
           } else {
-            // console.log("Single event ...");
             // Single event.
             var fullDayEvent = (isFacebookBirthday) ? true : isFullDayEvent(event);
-            // console.log(endDate + ":::::                                                   " + previous_days_ago.format('x'));
-            if (!fullDayEvent && endDate < previous_days_ago.format('x')) {
-              console.log("NOT FULL DAY OUTSIDE: " + title + ":" + moment(parseInt(endDate.format("x")), "x").toDate());
-              // console.log("It's not a fullday event, and it is in the past. So skip: " + title);
-              continue;
-            }
 
-            if (fullDayEvent && endDate <= previous_days_ago.format('x')) {
-              console.log("FULL DAY OUTSIDE: " + title + ":" + moment(parseInt(endDate.format("x")), "x").toDate());
-
-              // console.log("It's a fullday event, and it is before today. So skip: " + title);
-              // console.log(endDate + "                           :::::" + previous_days_ago.format('x'));
-              continue;
-            }
-
-            if (startDate > future.format('x')) {
-              console.log("START DATE OUTSIDE: " + title + ":" + moment(parseInt(startDate.format("x")), "x").toDate());
-              console.log("Start Date:" + startDate);
-              console.log("Future:" + future.format('x'));
-
-              // console.log("It exceeds the maximumNumberOfDays limit. So skip: " + title);
+            // Skip conditions for events
+            // Full day event and it has passed the window for previous days ago
+            // Not full day and end date has passed window for previous days ago
+            // Start Date is past the how many days to gather window, event not in window
+            if ((!fullDayEvent && endDate < previous_days_ago.format('x')) ||
+                fullDayEvent && endDate <= previous_days_ago.format('x') ||
+                startDate > future.format('x') ) {
               continue;
             }
 
             // Every thing is good. Add it to the list.
-            console.log('ADDING EVENT: ' + title);
             newEvents.push({
               title: title,
               startDate: startDate.format("x"),
@@ -205,15 +168,7 @@ var CalendarFetcher = function(url, auth, reloadInterval, maximumNumberOfDays, p
       newEvents.sort(function(a, b) {
         return a.startDate - b.startDate;
       });
-
-      //console.log(newEvents);
-
-      // events = newEvents.slice(0, maximumEntries);
       events = newEvents;
-      // console.log('=========================================================');
-      // console.dir(newEvents);
-      // console.log('=========================================================');
-
       self.broadcastEvents();
       scheduleTimer();
     });
