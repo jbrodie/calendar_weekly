@@ -204,6 +204,7 @@ Module.register("calendar_weekly", {
 
   // Override socket notification handler.
   socketNotificationReceived: function(notification, payload, sender) {
+    this.EventsList = [];
     payload = payload['events'];
     if (notification === "WEEKLY_EVENTS") {
       if (typeof payload !== 'undefined' && payload !== null) {
