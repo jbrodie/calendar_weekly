@@ -6,9 +6,16 @@ exports.fromURL = function(url, opts, cb){
   if (!cb)
     return;
   request(url, opts, function(err, r, data){
-    if (err)
-      return cb(err, null);
-    cb(undefined, ical.parseICS(data));
+  	if (err)
+  	{
+  	  return cb(err, null);
+  	}
+  	else if (r.statusCode != 200)
+  	{
+       return cb(r.statusCode + ": " + r.statusMessage, null);
+  	}
+
+  	cb(undefined, ical.parseICS(data));
   })
 }
 
@@ -26,7 +33,7 @@ ical.objectHandlers['RRULE'] = function(val, params, curr, stack, line){
 var originalEnd = ical.objectHandlers['END'];
 ical.objectHandlers['END'] = function (val, params, curr, stack) {
 	// Recurrence rules are only valid for VEVENT, VTODO, and VJOURNAL.
-	// More specifically, we need to filter the VCALENDAR type because we might end up with a defined rrule 
+	// More specifically, we need to filter the VCALENDAR type because we might end up with a defined rrule
 	// due to the subtypes.
 	if ((val === "VEVENT") || (val === "VTODO") || (val === "VJOURNAL")) {
 		if (curr.rrule) {
@@ -40,8 +47,17 @@ ical.objectHandlers['END'] = function (val, params, curr, stack) {
 					}
 				}
 
-				rule += ';DTSTART=' + curr.start.toISOString().replace(/[-:]/g, '');
-				rule = rule.replace(/\.[0-9]{3}/, '');
+
+				if (typeof curr.start.toISOString === 'function') {
+					try {
+						rule += ';DTSTART=' + curr.start.toISOString().replace(/[-:]/g, '');
+						rule = rule.replace(/\.[0-9]{3}/, '');
+					} catch (error) {
+						console.error("ERROR when trying to convert to ISOString", error);
+					}
+				} else {
+						console.error("No toISOString function in curr.start", curr.start);
+				}
 			}
 			curr.rrule = rrule.fromString(rule);
 		}

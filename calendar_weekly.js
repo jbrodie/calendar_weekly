@@ -37,6 +37,7 @@ Module.register("calendar_weekly", {
   // Override start method
   start: function() {
     Log.log("Starting module: " + this.name);
+    Log.log("-----------------------------------------------------------------------------------------");
     // Set locale
     moment.locale(config.language);
     // Calculate next midnight and add updateDelay
@@ -49,9 +50,12 @@ Module.register("calendar_weekly", {
       var calendar = this.config.calendars[c];
       calendar.url = calendar.url.replace("webcal://", "http://");
       var calendarConfig = {
-        maximumNumberOfDays: this.config.weeksToShow * 7,
-        previousDaysOfEvents: this.config.previousDaysOfEvents,
+
       };
+      // var calendarConfig = {
+      //   maximumNumberOfDays: this.config.weeksToShow * 7,
+      //   previousDaysOfEvents: this.config.previousDaysOfEvents,
+      // };
       // we check user and password here for backwards compatibility with old configs
       if (calendar.user && calendar.pass) {
         Log.warn("Deprecation warning: Please update your calendar authentication configuration.");
@@ -73,9 +77,14 @@ Module.register("calendar_weekly", {
     this.sendSocketNotification("ADD_CALENDAR_WEEKLY", {
       url: url,
       auth: auth,
-      fetchInterval: calendarConfig.fetchInterval || this.config.fetchInterval,
+      // fetchInterval: calendarConfig.fetchInterval || this.config.fetchInterval,
+      // maximumNumberOfDays: calendarConfig.maximumNumberOfDays || this.config.maximumNumberOfDays,
+      // previousDaysOfEvents: calendarConfig.previousDaysOfEvents || this.config.previousDaysOfEvents,
+      reloadInterval: calendarConfig.reloadInterval || this.config.reloadInterval,
+      excludedEvents: calendarConfig.excludedEvents || this.config.excludedEvents,
+      maximumEntries: calendarConfig.maximumEntries || this.config.maximumEntries,
       maximumNumberOfDays: calendarConfig.maximumNumberOfDays || this.config.maximumNumberOfDays,
-      previousDaysOfEvents: calendarConfig.previousDaysOfEvents || this.config.previousDaysOfEvents,
+      includePastEvents: calendarConfig.includePastEvents || this.config.includePastEvents,
     });
   },
 
@@ -204,6 +213,7 @@ Module.register("calendar_weekly", {
 
   // Override socket notification handler.
   socketNotificationReceived: function(notification, payload, sender) {
+    // debugger;
     this.EventsList = [];
     payload = payload['events'];
     if (notification === "WEEKLY_EVENTS") {
@@ -244,6 +254,7 @@ Module.register("calendar_weekly", {
     ];
     for (var i = 0; i < this.EventsList.length; i++) {
       var start_date = parseInt(this.EventsList[i].startDate);
+      // debugger;
       if (today === moment(start_date).date() && month === moment(start_date).month()) {
         if (this.EventsList[i].fullDayEvent === true) {
           events[0].push(this.EventsList[i]);

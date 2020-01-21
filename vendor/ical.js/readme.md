@@ -7,7 +7,6 @@ A tolerant, minimal icalendar parser for javascript/node
 (http://tools.ietf.org/html/rfc5545)
 
 
-
 ## Install - Node.js ##
 
 ical.js is availble on npm:

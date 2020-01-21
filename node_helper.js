@@ -20,7 +20,8 @@ module.exports = NodeHelper.create({
   // Override socketNotificationReceived method.
   socketNotificationReceived: function(notification, payload) {
     if (notification === "ADD_CALENDAR_WEEKLY") {
-      this.createFetcher(payload.url, payload.auth, payload.fetchInterval, payload.maximumNumberOfDays, payload.previousDaysOfEvents);
+      // this.createFetcher(payload.url, payload.auth, payload.fetchInterval, payload.maximumNumberOfDays, payload.previousDaysOfEvents);
+      this.createFetcher(payload.url, payload.reloadInterval, payload.excludedEvents, payload.maximumEntries, payload.maximumNumberOfDays, payload.auth, payload.includePastEvents);
     }
   },
 
@@ -35,7 +36,8 @@ module.exports = NodeHelper.create({
    * attribute previousDaysOfEvents number - Number of days previous to today to get events for..
    */
 
-  createFetcher: function(url, auth, fetchInterval, maximumNumberOfDays, previousDaysOfEvents) {
+  // createFetcher: function(url, auth, fetchInterval, maximumNumberOfDays, previousDaysOfEvents) {
+  createFetcher: function (url, reloadInterval, excludedEvents, maximumEntries, maximumNumberOfDays, auth, includePastEvents) {
     var self = this;
 
     if (!validUrl.isUri(url)) {
@@ -47,8 +49,9 @@ module.exports = NodeHelper.create({
 
     var fetcher;
     if (typeof self.fetchers[url] === "undefined") {
-      console.log("Create new calendar fetcher for url: " + url + " - Interval: " + fetchInterval);
-      fetcher = new CalendarFetcher(url, auth, fetchInterval, maximumNumberOfDays, previousDaysOfEvents);
+      console.log("Create new calendar fetcher for url: " + url + " - Interval: " + reloadInterval);
+      // console.log("Create new calendar fetcher for url: " + url + " - Interval: " + fetchInterval);
+      fetcher = new CalendarFetcher(url, reloadInterval, excludedEvents, maximumEntries, maximumNumberOfDays, auth, includePastEvents);
       fetcher.onReceive(function(fetcher) {
         self.sendSocketNotification("WEEKLY_EVENTS", {
           url: fetcher.url(),
