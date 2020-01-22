@@ -77,21 +77,14 @@ var CalendarFetcher = function (url, reloadInterval, excludedEvents, maximumEntr
       };
 
       for (var e in data) {
-        console.log("EVENT: " + event);
         var event = data[e];
         var now = new Date();
         var today = moment().startOf("day").toDate();
         var future = moment().startOf("day").add(maximumNumberOfDays, "days").subtract(1, "seconds").toDate(); // Subtract 1 second so that events that start on the middle of the night will not repeat.
         var past = today;
-        console.log("includePastEvents: " + includePastEvents);
-        console.log("maximumNumberOfDays: " + maximumNumberOfDays);
-        console.log("past_before: " + past);
         if (includePastEvents) {
           past = moment(today).startOf("day").subtract(maximumNumberOfDays, "days").toDate();
-          console.log("past_after: " + past);
         }
-        
-        console.log(past);
         // FIXME:
         // Ugly fix to solve the facebook birthday issue.
         // Otherwise, the recurring events only show the birthday for next year.
@@ -197,8 +190,13 @@ var CalendarFetcher = function (url, reloadInterval, excludedEvents, maximumEntr
             // For recurring events, get the set of start dates that fall within the range
             // of dates we"re looking for.
             var new_dates = [];
+            console.log("PAST: " + past);
+            console.log("FUTURE: " + future);
+
             var dates = rule.between(past, future, true);
             dates.forEach(d => {
+              console.log("NORMAL: " + moment(d).format('YYYY-MM-DD'));
+              console.log("UTC ADJUSTED: " + moment.utc(d).format('YYYY-MM-DD'));
               if (moment(d).format('YYYY-MM-DD') != moment.utc(d).format('YYYY-MM-DD')) {
                 new_dates.push(moment(d).add(1, 'days'));
               } else {
@@ -206,6 +204,7 @@ var CalendarFetcher = function (url, reloadInterval, excludedEvents, maximumEntr
               }
             });
             dates = new_dates;
+            console.log("---------------------------------------");
 
             // The "dates" array contains the set of dates within our desired date range range that are valid
             // for the recurrence rule.  *However*, it"s possible for us to have a specific recurrence that
