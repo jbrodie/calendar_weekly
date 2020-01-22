@@ -190,13 +190,13 @@ var CalendarFetcher = function (url, reloadInterval, excludedEvents, maximumEntr
             // For recurring events, get the set of start dates that fall within the range
             // of dates we"re looking for.
             var new_dates = [];
-            console.log("PAST: " + past);
-            console.log("FUTURE: " + future);
+            // console.log("PAST: " + past);
+            // console.log("FUTURE: " + future);
 
             var dates = rule.between(past, future, true);
             dates.forEach(d => {
-              console.log("NORMAL: " + moment(d).format('YYYY-MM-DD'));
-              console.log("UTC ADJUSTED: " + moment.utc(d).format('YYYY-MM-DD'));
+              // console.log("NORMAL: " + moment(d).format('YYYY-MM-DD'));
+              // console.log("UTC ADJUSTED: " + moment.utc(d).format('YYYY-MM-DD'));
               if (moment(d).format('YYYY-MM-DD') != moment.utc(d).format('YYYY-MM-DD')) {
                 new_dates.push(moment(d).add(1, 'days'));
               } else {
@@ -204,7 +204,7 @@ var CalendarFetcher = function (url, reloadInterval, excludedEvents, maximumEntr
               }
             });
             dates = new_dates;
-            console.log("---------------------------------------");
+            // console.log("---------------------------------------");
 
             // The "dates" array contains the set of dates within our desired date range range that are valid
             // for the recurrence rule.  *However*, it"s possible for us to have a specific recurrence that
