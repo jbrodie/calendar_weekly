@@ -96,7 +96,7 @@ var CalendarFetcher = function(url, auth, reloadInterval, maximumNumberOfDays, p
             }
           }
 
-          // calculate the duration f the event for use with recurring events.
+          // calculate the duration of the event for use with recurring events.
           var duration = parseInt(endDate.format("x")) - parseInt(startDate.format("x"));
 
           if (event.start.length === 8) {
@@ -122,17 +122,17 @@ var CalendarFetcher = function(url, auth, reloadInterval, maximumNumberOfDays, p
               startDate = moment(new Date(dates[d]));
               endDate = moment(parseInt(startDate.format("x")) + duration, "x");
               if (endDate.format("x") > previous_days_ago.format("x")) {
-	              newEvents.push({
-	                title: title,
-	                startDate: startDate.format("x"),
-	                endDate: endDate.format("x"),
-	                fullDayEvent: isFullDayEvent(event),
-	                class: event.class,
-	                firstYear: event.start.getFullYear(),
-	                location: location,
-	                geo: geo,
-	                description: description
-	              });
+                  newEvents.push({
+                    title: title,
+                    startDate: startDate.format("x"),
+                    endDate: endDate.format("x"),
+                    fullDayEvent: isFullDayEvent(event),
+                    class: event.class,
+                    firstYear: event.start.getFullYear(),
+                    location: location,
+                    geo: geo,
+                    description: description
+                  });
               }
             }
           } else {
@@ -149,18 +149,35 @@ var CalendarFetcher = function(url, auth, reloadInterval, maximumNumberOfDays, p
               continue;
             }
 
-            // Every thing is good. Add it to the list.
-            newEvents.push({
-              title: title,
-              startDate: startDate.format("x"),
-              endDate: endDate.format("x"),
-              fullDayEvent: fullDayEvent,
-              class: event.class,
-              location: location,
-              geo: geo,
-              description: description
-            });
-
+            // Handle multi-day events
+            if (startDate.isBefore(endDate, 'day')) {
+              var current = startDate.clone();
+              while (current.isBefore(endDate, 'day')) {
+                newEvents.push({
+                  title: title,
+                  startDate: current.startOf('day').format("x"),
+                  endDate: current.endOf('day').format("x"),
+                  fullDayEvent: true,
+                  class: event.class,
+                  location: location,
+                  geo: geo,
+                  description: description
+                });
+                current.add(1, 'day');
+              }
+            } else {
+              // Single-day event
+              newEvents.push({
+                title: title,
+                startDate: startDate.format("x"),
+                endDate: endDate.format("x"),
+                fullDayEvent: fullDayEvent,
+                class: event.class,
+                location: location,
+                geo: geo,
+                description: description
+              });
+            }
           }
         }
       }
@@ -263,6 +280,5 @@ var CalendarFetcher = function(url, auth, reloadInterval, maximumNumberOfDays, p
   };
 
 };
-
 
 module.exports = CalendarFetcher;
