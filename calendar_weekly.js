@@ -204,35 +204,10 @@ Module.register("calendar_weekly", {
 
   // Override socket notification handler.
   socketNotificationReceived: function(notification, payload, sender) {
-    // Initialize EventsList if it doesn't exist
-    if (!this.EventsList) {
-      this.EventsList = [];
-    }
-
-    payload = payload['events'];
     if (notification === "WEEKLY_EVENTS") {
-      if (typeof payload !== 'undefined' && payload !== null) {
-        for (var i = 0; i < payload.length; i++) {
-          var duplicate = false;
-          for (var j = 0; j < this.EventsList.length; j++) {
-            // Check for duplicates based on title, start date, and end date for more accuracy
-            if (this.EventsList[j].title === payload[i].title &&
-                this.EventsList[j].startDate === payload[i].startDate &&
-                this.EventsList[j].endDate === payload[i].endDate) {
-              this.EventsList[j] = payload[i];
-              duplicate = true;
-              break; // Exit loop once duplicate is found and updated
-            }
-          }
-          if (!duplicate) {
-            this.EventsList.push(payload[i]);
-          }
-          var start_date = parseInt(payload[i].startDate);
-          var event_date = moment(start_date);
-          var day = moment(start_date).date();
-          var month = moment(start_date).month();
-        }
-        console.log("Getting events from my-calendar module " + this.EventsList.length);
+      if (payload && payload.events) {
+        this.EventsList = payload.events;
+        console.log("Received " + this.EventsList.length + " events from all calendars.");
       }
     } else {
       console.log("Calendar received an unknown socket notification: " + notification);

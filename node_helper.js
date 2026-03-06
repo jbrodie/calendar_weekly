@@ -12,8 +12,9 @@ var CalendarFetcher = require("./calendarfetcher.js");
 module.exports = NodeHelper.create({
   // Override start method.
   start: function() {
-    var events = [];
     this.fetchers = [];
+    this.calendarEvents = {};
+    this.expectedUrls = [];
     console.log("Starting node helper for: " + this.name);
   },
 
@@ -45,15 +46,20 @@ module.exports = NodeHelper.create({
       return;
     }
 
+    if (self.expectedUrls.indexOf(url) === -1) {
+      self.expectedUrls.push(url);
+    }
+
     var fetcher;
     if (typeof self.fetchers[url] === "undefined") {
       console.log("Create new calendar fetcher for url: " + url + " - Interval: " + fetchInterval);
       fetcher = new CalendarFetcher(url, auth, fetchInterval, maximumNumberOfDays, previousDaysOfEvents);
+
       fetcher.onReceive(function(fetcher) {
-        self.sendSocketNotification("WEEKLY_EVENTS", {
-          url: fetcher.url(),
-          events: fetcher.events()
-        });
+        self.calendarEvents[fetcher.url()] = fetcher.events();
+        if (self.allCalendarsLoaded()) {
+          self.broadcastAllEvents();
+        }
       });
 
       fetcher.onError(function(fetcher, error) {
@@ -70,5 +76,25 @@ module.exports = NodeHelper.create({
     }
 
     fetcher.startFetch();
+  },
+
+  allCalendarsLoaded: function() {
+    for (var i = 0; i < this.expectedUrls.length; i++) {
+      if (typeof this.calendarEvents[this.expectedUrls[i]] === "undefined") {
+        return false;
+      }
+    }
+    return true;
+  },
+
+  broadcastAllEvents: function() {
+    var allEvents = [];
+    for (var url in this.calendarEvents) {
+      allEvents = allEvents.concat(this.calendarEvents[url]);
+    }
+    console.log("Broadcasting combined " + allEvents.length + " events from all calendars.");
+    this.sendSocketNotification("WEEKLY_EVENTS", {
+      events: allEvents
+    });
   }
 });
